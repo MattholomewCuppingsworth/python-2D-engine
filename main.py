@@ -129,9 +129,9 @@ def main():
 	frameIter = FrameIter(gogglesBack, True, frames)
 
 	mainDude = Character(frameIter, Position(size[0]/2,size[1]/2), Movement(0,0))
+	moving = False
 
 	while(not done):	#game loop
-
 		#	For each event (keypress, mouse click, etc.):
 		for event in pygame.event.get(): # User did something
 			keys = pygame.key.get_pressed()
@@ -143,21 +143,17 @@ def main():
 					print "We're outta here!"
 					done = True
 				if(keys[pygame.K_UP]):
-					print "Move Up"
 					mainDude.movement.dy = -2
-					mainDude.frames.images = gogglesBack
+					moving = True
 				if(keys[pygame.K_DOWN]):
-					print "Move Down"
 					mainDude.movement.dy = 2
-					mainDude.frames.images = gogglesForward
+					moving = True
 				if(keys[pygame.K_LEFT]):
-					print "Move Left"
 					mainDude.movement.dx = -2
-					mainDude.frames.images = gogglesLeft
+					moving = True
 				if(keys[pygame.K_RIGHT]):
-					print "Move Right"
 					mainDude.movement.dx = 2
-					mainDude.frames.images = gogglesRight
+					moving = True
 			elif event.type == pygame.KEYUP:
 				# Up or down is still pressed, stop left and right movement
 				if (keys[pygame.K_DOWN] or keys[pygame.K_UP]):
@@ -169,6 +165,7 @@ def main():
 				else:
 					mainDude.movement.dx = 0
 					mainDude.movement.dy = 0
+					moving = False
 			elif event.type == pygame.MOUSEMOTION:
 				location = pygame.mouse.get_pos()
 				print location
@@ -180,11 +177,24 @@ def main():
 		#	Run calculations to determine where objects move, what happens when objects collide, etc.
 		mainDude.position.update(mainDude.movement.dx, mainDude.movement.dy)
 
+		if(mainDude.movement.dx > 0):
+			mainDude.frames.images = gogglesRight
+		elif(mainDude.movement.dx < 0):
+			mainDude.frames.images = gogglesLeft
+		if(mainDude.movement.dy > 0):
+			mainDude.frames.images = gogglesForward
+		elif(mainDude.movement.dy < 0):
+			mainDude.frames.images = gogglesBack
+
 		#	Clear the screen
 		screen.fill((1,1,1))
 
 		#	Draw everything
-		screen.blit(mainDude.frames.next(), (mainDude.position.x, mainDude.position.y))
+		if moving:
+			screen.blit(mainDude.frames.next(), (mainDude.position.x, mainDude.position.y))
+		else:
+			screen.blit(mainDude.frames.images[0], (mainDude.position.x, mainDude.position.y))
+
 
 		pygame.display.update()
 
