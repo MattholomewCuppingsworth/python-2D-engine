@@ -3,6 +3,69 @@ import pygame, random
 #Window Size constant
 size = (800, 600)
 
+
+#Components
+class Position:
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+	def update(self, dx, dy):
+		self.x += dx
+		self.y += dy
+
+class Movement:
+	def __init__(self, dx, dy):
+		self.dy = dy
+		self.dx = dx
+
+class Graphic(pygame.sprite.Sprite):
+	def __init__(self, width, height, image):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.Surface([width, height])
+		self.image.blit(image, (0,0))
+
+
+
+#Entities
+class Character:
+	def __init__(self, frames, position, movement):
+		self.frames = frames
+		self.position = position
+		self.movement = movement
+
+
+
+#Tools (To be moved to a util file later)
+class SpriteSheet(object):
+	def __init__(self, filename):
+		try:
+			self.sheet = pygame.image.load(filename).convert()
+		except pygame.error, message:
+			print 'Unable to load spritesheet image:', filename
+			raise SystemExit, message
+	# Load a specific image from a specific rectangle
+	def image_at(self, rectangle, colorkey = None):
+		"Loads image from x,y,x+offset,y+offset"
+		rect = pygame.Rect(rectangle)
+		image = pygame.Surface(rect.size).convert()
+		image.blit(self.sheet, (0, 0), rect)
+		if colorkey is not None:
+			if colorkey is -1:
+				colorkey = image.get_at((0,0))
+				image.set_colorkey(colorkey, pygame.RLEACCEL)
+				return image
+	# Load a whole bunch of images and return them as a list
+	def images_at(self, rects, colorkey = None):
+		"Loads multiple images, supply a list of coordinates" 
+		return [self.image_at(rect, colorkey) for rect in rects]
+	# Load a whole strip of images
+	def load_strip(self, rect, image_count, colorkey = None):
+		"Loads a strip of images and returns them as a list"
+		tups = [(rect[0]+rect[2]*x, rect[1], rect[2], rect[3])
+				for x in range(image_count)]
+		return self.images_at(tups, colorkey)
+
+
 class FrameIter: #iterates through a list of graphics
 	def __init__(self, images, loop = False, frames = 1):
 		"""construct a SpriteStripAnim
@@ -40,59 +103,8 @@ class FrameIter: #iterates through a list of graphics
 		self.images.extend(ss.images)
 		return self
 
-class Position:
-	def __init__(self, x, y):
-		self.x = x
-		self.y = y
-	def update(self, dx, dy):
-		self.x += dx
-		self.y += dy
 
-class Movement:
-	def __init__(self, dx, dy):
-		self.dy = dy
-		self.dx = dx
 
-class Graphic(pygame.sprite.Sprite):
-	def __init__(self, width, height, image):
-		pygame.sprite.Sprite.__init__(self)
-		self.image = pygame.Surface([width, height])
-		self.image.blit(image, (0,0))
-
-class Character:
-	def __init__(self, frames, position, movement):
-		self.frames = frames
-		self.position = position
-		self.movement = movement
-
-class SpriteSheet(object):
-	def __init__(self, filename):
-		try:
-			self.sheet = pygame.image.load(filename).convert()
-		except pygame.error, message:
-			print 'Unable to load spritesheet image:', filename
-			raise SystemExit, message
-	# Load a specific image from a specific rectangle
-	def image_at(self, rectangle, colorkey = None):
-		"Loads image from x,y,x+offset,y+offset"
-		rect = pygame.Rect(rectangle)
-		image = pygame.Surface(rect.size).convert()
-		image.blit(self.sheet, (0, 0), rect)
-		if colorkey is not None:
-			if colorkey is -1:
-				colorkey = image.get_at((0,0))
-				image.set_colorkey(colorkey, pygame.RLEACCEL)
-				return image
-	# Load a whole bunch of images and return them as a list
-	def images_at(self, rects, colorkey = None):
-		"Loads multiple images, supply a list of coordinates" 
-		return [self.image_at(rect, colorkey) for rect in rects]
-	# Load a whole strip of images
-	def load_strip(self, rect, image_count, colorkey = None):
-		"Loads a strip of images and returns them as a list"
-		tups = [(rect[0]+rect[2]*x, rect[1], rect[2], rect[3])
-				for x in range(image_count)]
-		return self.images_at(tups, colorkey)
 
 def main():
 	pygame.init()
@@ -103,16 +115,22 @@ def main():
 
 	char_sprites = SpriteSheet("./sprites.png")
 
-	blueHairedForward = char_sprites.load_strip((0,192,72,224), 3, -1)
-	blueHairedLeft = char_sprites.load_strip((0,224,72,256), 3, -1)
-	blueHairedRight = char_sprites.load_strip((0,160,72,192), 3, -1)
-	blueHairedBack = char_sprites.load_strip((0,128,72,192), 3, -1)
+	blueHairedBack = char_sprites.load_strip((0,128,24,32), 3, -1)
+	blueHairedRight = char_sprites.load_strip((0,160,24,32), 3, -1)
+	blueHairedForward = char_sprites.load_strip((0,192,24,32), 3, -1)
+	blueHairedLeft = char_sprites.load_strip((0,224,24,32), 3, -1)
+
+	gogglesBack = char_sprites.load_strip((144,0,24,32), 3, -1)
+	gogglesRight = char_sprites.load_strip((144,32,24,32), 3, -1)
+	gogglesForward = char_sprites.load_strip((144,64,24,32), 3, -1)
+	gogglesLeft = char_sprites.load_strip((144,96,24,32), 3, -1)
+	
 	frames = 5
-	frameIter = FrameIter(blueHairedForward, True, frames)
+	frameIter = FrameIter(gogglesBack, True, frames)
 
 	mainDude = Character(frameIter, Position(size[0]/2,size[1]/2), Movement(0,0))
 
-	while(not done):	
+	while(not done):	#game loop
 
 		#	For each event (keypress, mouse click, etc.):
 		for event in pygame.event.get(): # User did something
@@ -127,15 +145,19 @@ def main():
 				if(keys[pygame.K_UP]):
 					print "Move Up"
 					mainDude.movement.dy = -2
+					mainDude.frames.images = gogglesBack
 				if(keys[pygame.K_DOWN]):
 					print "Move Down"
 					mainDude.movement.dy = 2
+					mainDude.frames.images = gogglesForward
 				if(keys[pygame.K_LEFT]):
 					print "Move Left"
 					mainDude.movement.dx = -2
+					mainDude.frames.images = gogglesLeft
 				if(keys[pygame.K_RIGHT]):
 					print "Move Right"
 					mainDude.movement.dx = 2
+					mainDude.frames.images = gogglesRight
 			elif event.type == pygame.KEYUP:
 				# Up or down is still pressed, stop left and right movement
 				if (keys[pygame.K_DOWN] or keys[pygame.K_UP]):
