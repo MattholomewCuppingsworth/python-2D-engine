@@ -50,8 +50,8 @@ class Tile:
     def __init__(self, img, collision):
         # img = file path to tile graphic (16x16 png)        
         # collision = boolean, true = impassible
-        fullpath = os.path.abspath(os.path.join('./', "{img}.png".format(img=img)))
-        self.img = pygame.image.load(fullpath)
+        fullpath = os.path.abspath(os.path.join('./img/', "{img}.png".format(img=img)))
+        self.img = pygame.image.load(fullpath).convert()
         self.collision = collision
     
     def drawTile(self, displaySurf, (x, y)):

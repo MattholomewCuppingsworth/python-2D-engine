@@ -11,7 +11,7 @@ def main():
     clock = pygame.time.Clock()
     done = False
 
-    char_sprites = gameUtils.SpriteSheet("./sprites.png")
+    char_sprites = gameUtils.SpriteSheet("test/sprites")
 
     blueHairedBack = char_sprites.load_strip((0,128,24,32), 3, -1)
     blueHairedRight = char_sprites.load_strip((0,160,24,32), 3, -1)
@@ -30,20 +30,20 @@ def main():
 
     # Making the tileset
     tileset = entityComponent.Tileset(
-        floor={'img':'purple-octagon-tile', 'collide':False},
-        nwall={'img':'purple-wall-north', 'collide':True},
-        swall={'img':'purple-wall-south', 'collide':True},
-        ewall={'img':'purple-wall-east', 'collide':True},
-        wwall={'img':'purple-wall-west', 'collide':True},
-        newall={'img':'purple-wall-northeast-corner', 'collide':True},
-        nwwall={'img':'purple-wall-northwest-corner', 'collide':True},
-        sewall={'img':'purple-wall-southeast-corner', 'collide':True},
-        swwall={'img':'purple-wall-southwest-corner', 'collide':True}
+        floor={'img':'test/purple-octagon-tile', 'collide':False},
+        nwall={'img':'test/purple-wall-north', 'collide':True},
+        swall={'img':'test/purple-wall-south', 'collide':True},
+        ewall={'img':'test/purple-wall-east', 'collide':True},
+        wwall={'img':'test/purple-wall-west', 'collide':True},
+        newall={'img':'test/purple-wall-northeast-corner', 'collide':True},
+        nwwall={'img':'test/purple-wall-northwest-corner', 'collide':True},
+        sewall={'img':'test/purple-wall-southeast-corner', 'collide':True},
+        swwall={'img':'test/purple-wall-southwest-corner', 'collide':True}
     )
 
     # First room layout
     layout = []
-    with open('test-floorplan.csv', mode='rb') as floorplan:
+    with open('maps/test-floorplan.csv', mode='rb') as floorplan:
         reader = csv.reader(floorplan,delimiter=',')
         for row in reader:
             layout.append(row)
