@@ -47,7 +47,7 @@ def main():
         reader = csv.reader(floorplan,delimiter=',')
         for row in reader:
             layout.append(row)
-    firstMap = entityComponent.Map(tileset, layout)
+    firstMap = entityComponent.Map(tileset, layout, screen)
 
     # game loop
     while(not done):
@@ -80,8 +80,9 @@ def main():
         #	Clear the screen
         screen.fill((0,0,0))
 
-        #	Draw everything
-        firstMap.drawMap(screen)
+        # Draw things that are layered on bottom first
+        firstMap.drawMap()
+        # Draw player on top of background layers
         mainDude.drawCharacter(screen)
         pygame.display.update()
 

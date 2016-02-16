@@ -1,4 +1,5 @@
 import pygame, os
+from math import floor
 
 #Components
 class Position:
@@ -24,21 +25,29 @@ class Graphic(pygame.sprite.Sprite):
         self.image.blit(image, (0,0))
 
 class Map:
-    def __init__(self, tileset, layout):
-        # tiles = dict in format {'name' : Tile Object}, all tiles used on this map
+    def __init__(self, tileset, layout, displaySurf):
+        # tileset = all tiles used on this map
         # layout = 2D list, each value is a tile name as listed in self.tiles
+        # displaySurf = surface we draw map onto, usually the base screen surface
         self.tileset = tileset
         self.layout = layout
+        self.displaySurf = displaySurf
+        # 2D Array where we match each item in the layout with the associated tile
         self.tiles = [[self.tileset.mappings[col] for col in row] for row in self.layout]
-        
-    def drawMap(self, displaySurf):
-        # appending each tile to the 2d array and blitting them
-        # displaySurf = pygame Surface to blit tiles onto
+        # Offset: added x+y coords to help draw map centered on screen, measured in tiles
+        pxAcrossScreen = self.displaySurf.get_width()
+        pxDownScreen = self.displaySurf.get_height()
+        pxAcrossMap = len(self.tiles[0])*16
+        pxDownMap = len(self.tiles)*16
+        self.offsetX = int(floor(pxAcrossScreen/2) - floor(pxAcrossMap/2))
+        self.offsetY = int(floor(pxDownScreen/2) - floor(pxDownMap/2))
+
+    def drawMap(self):
         for col_idx, col in enumerate(self.tiles, start=0):
             for row_idx, tile in enumerate(col, start=0):
                 # all tiles are 16x16 so x-y coords are index*16
-                coords = (row_idx*16, col_idx*16)
-                tile.drawTile(displaySurf, coords)
+                coords = (row_idx*16+self.offsetX, col_idx*16+self.offsetY)
+                tile.drawTile(self.displaySurf, coords)
                 
 class Tileset:
     def __init__(self, **kwargs):
@@ -70,21 +79,4 @@ class Character:
             displaySurf.blit(self.frames.next(), (self.position.x, self.position.y))
         else:
             displaySurf.blit(self.frames.images[0], (self.position.x, self.position.y))
-
-
-'''
-class Camera:
-# Each map should have a camera object. Starts centered on main character
-    # but should not extend beyond map bounds
-    def __init__(self, center, (width, height)):
-        self.center = center
-        self.size = (width, height)
-    def drawWithinBounds(self, surface, map, pc, npcs = []):
-        surface.blit(map.background, map.position)
-        if pc.movement.up or pc.movement.down or pc.movement.left or pc.movement.right: #Only animate the character if the character is actually moving. Otherwise, stay in standing frame
-            surface.blit(pc.frames.next(), (pc.position.x, pc.position.y))
-        else:
-            surface.blit(pc.frames.images[0], (pc.position.x, pc.position.y))
-        for npc in npcs:
-            surface.blit(npc.frames.next(), (npc.position.x, npc.position.y))
-'''
+            
